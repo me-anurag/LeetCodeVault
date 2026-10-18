@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>LeetVault</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand"><img src="icons/icon32.png" alt="" width="18" height="18" />LeetVault</div>
+      <div id="sync" class="sync" title="Connection to Supabase"><span class="dot"></span><span id="sync-text">…</span></div>
+    </header>
+
+    <!-- Login -->
+    <section id="view-login" hidden>
+      <p id="not-configured" class="msg err" hidden>Open <b>extension/config.js</b>, fill in your Supabase URL, anon key and Netlify site URL, then reload the extension at chrome://extensions.</p>
+      <form id="login-form">
+        <label>Email<input id="login-email" type="email" required autocomplete="email" /></label>
+        <label>Password<input id="login-password" type="password" required autocomplete="current-password" /></label>
+        <p id="login-msg" class="msg" hidden></p>
+        <div class="row">
+          <button type="submit" class="primary" id="login-btn">Log in</button>
+          <a href="#" id="register-link" class="muted">No account? Create one on the website</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Main -->
+    <section id="view-main" hidden>
+      <div id="question-loading" class="muted">Reading problem…</div>
+      <div id="question-none" class="muted" hidden></div>
+      <div id="question" hidden>
+        <h1 id="q-title"></h1>
+        <div class="meta"><span id="q-difficulty" class="badge"></span><span id="q-topics" class="topics"></span></div>
+        <label class="lang">Language
+          <select id="q-language"></select>
+        </label>
+        <div id="q-lang-source" class="hint"></div>
+        <div class="status-line">Status: <strong id="q-status">…</strong></div>
+        <button id="save-btn" class="primary wide" disabled>Save Question</button>
+      </div>
+      <p id="main-msg" class="msg" hidden></p>
+      <div id="queue" class="queue" hidden>
+        <div class="row between"><span id="queue-text"></span><button id="retry-btn" class="small">Retry now</button></div>
+        <ul id="queue-list"></ul>
+      </div>
+    </section>
+
+    <footer>
+      <a id="library-link" href="#">Open My Library ↗</a>
+      <span id="account" hidden><span id="account-email"></span> · <a id="logout-link" href="#">Log out</a></span>
+    </footer>
+    <script src="extractor.js"></script>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

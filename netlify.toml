@@ -1,0 +1,15 @@
+# Netlify: builds the React site from web/. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# in Site configuration → Environment variables.
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Client-side routes (/questions/123) must serve index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

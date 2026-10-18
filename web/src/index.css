@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+code, pre, textarea, .font-mono {
+  font-family: ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  /* Show `<=` and `->` exactly as written, not as ≤ / → ligatures. */
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* Original LeetCode statement HTML. */
+.statement {
+  @apply text-[15px] leading-relaxed break-words;
+}
+.statement p { @apply my-3; }
+.statement ul, .statement ol { @apply my-3 pl-6; }
+.statement ul { list-style: disc; }
+.statement ol { list-style: decimal; }
+.statement li { @apply my-1; }
+.statement strong { @apply font-semibold; }
+.statement code {
+  @apply rounded border border-zinc-200 bg-zinc-100 px-1 py-px text-[13px] dark:border-zinc-800 dark:bg-zinc-900;
+}
+.statement pre {
+  @apply my-3 overflow-x-auto whitespace-pre-wrap rounded-md border-l-2 border-zinc-300 bg-zinc-50 px-4 py-3 text-[13px] leading-6 dark:border-zinc-700 dark:bg-zinc-900;
+}
+.statement pre code { @apply border-0 bg-transparent p-0; }
+.statement img { @apply my-3 h-auto max-w-full rounded bg-white; }
+.statement sup { font-size: 0.75em; }
+.statement .example-block {
+  @apply my-3 rounded-md border-l-2 border-zinc-300 bg-zinc-50 px-4 py-1 text-[13px] dark:border-zinc-700 dark:bg-zinc-900;
+}
+.statement .example-block p { @apply my-2; }
+.statement .example-io { @apply font-mono; }
+
+/* highlight.js tokens, monochrome-leaning. */
+.hljs { color: inherit; background: transparent; }
+.hljs-keyword, .hljs-built_in, .hljs-type, .hljs-literal { @apply text-sky-700 dark:text-sky-300; }
+.hljs-string, .hljs-regexp { @apply text-emerald-700 dark:text-emerald-300; }
+.hljs-number { @apply text-amber-700 dark:text-amber-300; }
+.hljs-comment, .hljs-meta { @apply italic text-zinc-500; }
+.hljs-title, .hljs-title.function_, .hljs-title.class_ { @apply text-violet-700 dark:text-violet-300; }
+.hljs-params, .hljs-variable, .hljs-attr { @apply text-zinc-700 dark:text-zinc-300; }

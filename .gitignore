@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+backend/.env
+backend/*.db
+web/dist/
+tests/e2e/screenshots/
+passwords

@@ -1,0 +1,14 @@
+{
+  "name": "leetvault",
+  "private": true,
+  "scripts": {
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "test:db": "node --test tests/db/db.test.mjs"
+  },
+  "devDependencies": {
+    "supabase": "2.117.0"
+  }
+}

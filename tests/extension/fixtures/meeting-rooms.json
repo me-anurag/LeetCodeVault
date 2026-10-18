@@ -1,0 +1,28 @@
+{
+ "data": {
+  "question": {
+   "questionId": "252",
+   "questionFrontendId": "252",
+   "title": "Meeting Rooms",
+   "titleSlug": "meeting-rooms",
+   "difficulty": "Easy",
+   "isPaidOnly": true,
+   "content": null,
+   "topicTags": [
+    {
+     "name": "Array",
+     "slug": "array"
+    },
+    {
+     "name": "Sorting",
+     "slug": "sorting"
+    },
+    {
+     "name": "Quicksort",
+     "slug": "quicksort"
+    }
+   ],
+   "codeSnippets": null
+  }
+ }
+}
