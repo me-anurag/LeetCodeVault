@@ -86,6 +86,11 @@ export const getWarDays = (from, to) => run(supabase.rpc('war_days', { p_from: f
 
 export const getStreak = () => run(supabase.rpc('war_streak'))
 
+export const getWarSettings = () => run(supabase.rpc('get_war_settings'))
+
+// topics: LeetCode topic slugs; [] = any topic (random).
+export const setWarTopics = (topics) => run(supabase.rpc('set_war_topics', { p_topics: topics }))
+
 export const getWarHistory = ({ sort = 'newest', difficulty = [], topics = [], limit = 100 }) =>
   run(supabase.rpc('war_history', { p_sort: sort, p_difficulties: difficulty, p_topics: topics, p_limit: limit }))
 

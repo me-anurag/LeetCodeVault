@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { getWar } from '../api'
+import { getWar, getWarSettings } from '../api'
 import { useAuth } from '../auth'
 import { ErrorBox, Loading, useOnFocus } from '../components/ui'
 import { MenuItem, Sheet, TopBar, useSheet } from '../phone/Sheet'
 import { useIsPhone } from '../theme'
 import StreakCalendar from '../war/StreakCalendar'
 import { formatDay, formatLeft, formatTime, useNow } from '../war/time'
+import { topicName } from '../war/topics'
 
 const DOT = { Easy: 'bg-emerald-500', Medium: 'bg-amber-500', Hard: 'bg-rose-500' }
 
@@ -19,16 +20,20 @@ export default function War() {
   const { user, logout } = useAuth()
   const now = useNow()
   const [war, setWar] = useState(null)
+  const [focus, setFocus] = useState(null) // chosen topic slugs, [] = any
   const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
     setError(null)
     try {
-      setWar(await getWar(date))
+      const [w, settings] = await Promise.all([getWar(date), getWarSettings()])
+      setWar(w)
+      setFocus(settings.topics)
     } catch (err) {
       setError(err)
     }
   }, [date])
+  const focusText = focus?.length ? focus.map(topicName).join(', ') : 'Any topic'
 
   useEffect(() => { load() }, [load])
   useOnFocus(load)
@@ -44,7 +49,7 @@ export default function War() {
   const content = !war ? (
     error ? <ErrorBox error={error} onRetry={load} /> : <Loading />
   ) : (
-    <WarBody war={war} now={now} error={error} onRetry={load} />
+    <WarBody war={war} now={now} error={error} onRetry={load} focusText={focus ? focusText : null} />
   )
 
   if (!isPhone) return <div className="reader mx-auto max-w-2xl pt-6 pb-16">{content}</div>
@@ -60,6 +65,7 @@ export default function War() {
           <MenuItem hint={war ? `${war.streak.current} day${war.streak.current === 1 ? '' : 's'}` : ''}
             onClick={() => sheet.show('streak')}>Streak calendar</MenuItem>
           <MenuItem onClick={() => navigate('/history', { replace: true })}>History · all questions given</MenuItem>
+          <MenuItem hint={focus ? focusText : ''} onClick={() => navigate('/topics', { replace: true })}>Topic focus</MenuItem>
           <MenuItem onClick={() => navigate('/library', { replace: true })}>Library</MenuItem>
           <MenuItem tone="muted" hint={user?.email} onClick={logout}>Log out</MenuItem>
         </Sheet>
@@ -73,7 +79,7 @@ export default function War() {
   )
 }
 
-function WarBody({ war, now, error, onRetry }) {
+function WarBody({ war, now, error, onRetry, focusText }) {
   const isToday = war.date === war.today
   const deadline = Date.parse(war.deadline)
   const ended = now >= deadline
@@ -109,6 +115,11 @@ function WarBody({ war, now, error, onRetry }) {
         <p className={`mt-1 text-[15px] ${won ? 'text-emerald-800' : 'text-ink-soft'}`}>{status}</p>
         {isToday && ended && (
           <p className="mt-1 text-[15px] text-ink-soft">Next war at {formatTime(war.next_start)}.</p>
+        )}
+        {isToday && focusText && (
+          <Link to="/topics" className="mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/70 px-2.5 py-1 text-[13px] font-medium text-violet-700">
+            🎯 Focus: {focusText} ›
+          </Link>
         )}
 
         {total > 0 && (

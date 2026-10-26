@@ -117,6 +117,7 @@ export function Layout({ children }) {
             <Link to="/" className="hover:underline">War</Link>
             <Link to="/streak" className="hover:underline">Streak</Link>
             <Link to="/history" className="hover:underline">History</Link>
+            <Link to="/topics" className="hover:underline">Topics</Link>
             <Link to="/library" className="hover:underline">Library</Link>
           </nav>
         )}

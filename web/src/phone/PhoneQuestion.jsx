@@ -7,8 +7,8 @@ import { MenuItem, Sheet, TopBar, useSheet } from './Sheet'
 import { splitStatement } from './statement'
 import WarDone from '../war/WarDone'
 
-// Phone reader: only the question on screen (number, statement, example input/output, constraints).
-// Explanations and follow-ups collapse; everything else lives in the menu.
+// Phone reader: only the question on screen (number, statement, example input/output, constraints,
+// starter code). Explanations and follow-ups collapse; notes, solutions and actions live in the menu.
 export default function PhoneQuestion({
   question: q, statementHtml, error, reload, lang, setLang, onRemoveLanguage, onDelete, onNotesSaved,
 }) {
@@ -43,6 +43,9 @@ export default function PhoneQuestion({
             </Collapse>
           </div>
         )}
+        <Block title="Starter code" tone="text-sky-700">
+          <StarterCode question={q} lang={lang} setLang={setLang} onRemove={onRemoveLanguage} />
+        </Block>
         <WarDone key={q.id} question={q} />
       </article>
 
@@ -62,19 +65,11 @@ export default function PhoneQuestion({
           <MenuItem onClick={() => navigate('/', { replace: true })}>Today's war</MenuItem>
           <MenuItem onClick={() => navigate('/history', { replace: true })}>History</MenuItem>
           <MenuItem onClick={() => navigate('/library', { replace: true })}>Library</MenuItem>
-          <MenuItem hint={q.language_versions.map((v) => v.language_name).join(', ')} onClick={() => sheet.show('code')}>
-            Starter code
-          </MenuItem>
           <MenuItem hint={q.personal_notes.trim() ? 'Written' : ''} onClick={() => sheet.show('notes')}>My notes</MenuItem>
           <MenuItem hint={q.solutions.length || ''} onClick={() => sheet.show('solutions')}>My solutions</MenuItem>
           <MenuItem href={q.leetcode_url} hint="↗">Open on LeetCode</MenuItem>
           <MenuItem tone="danger" onClick={onDelete}>Delete question</MenuItem>
           <MenuItem tone="muted" hint={user?.email} onClick={logout}>Log out</MenuItem>
-        </Sheet>
-      )}
-      {sheet.open === 'code' && (
-        <Sheet title="Starter code" onClose={sheet.close}>
-          <StarterCode question={q} lang={lang} setLang={setLang} onRemove={onRemoveLanguage} />
         </Sheet>
       )}
       {sheet.open === 'notes' && (

@@ -40,6 +40,24 @@ begin
   end;
 end $$;
 
+-- 1b. Topic focus: a user set to String + Array only gets questions with one of those topics.
+insert into auth.users (id, email, aud, role)
+values ('00000000-0000-0000-0000-0000000000bb', 'war-topics@example.com', 'authenticated', 'authenticated');
+insert into public.war_settings (user_id, topics) values ('00000000-0000-0000-0000-0000000000bb', '{string,array}');
+
+do $$
+declare
+  uid constant uuid := '00000000-0000-0000-0000-0000000000bb';
+  v_off int;
+begin
+  assert private.fill_war(uid) = 15, 'topic-focused war has 15 questions';
+  select count(*) into v_off
+  from public.daily_war_items i join public.questions q on q.id = i.question_id
+  where i.user_id = uid and not (q.topic_slugs && '{string,array}');
+  raise notice 'topic focus: % of 15 outside String/Array', v_off;
+  assert v_off = 0, format('%s questions outside the chosen topics', v_off);
+end $$;
+
 -- 2. Streak rules, seen as the user: three won days in a row after a lost one; today still running.
 update public.daily_wars set deadline = now() + interval '1 hour'
 where user_id = '00000000-0000-0000-0000-0000000000aa' and war_date = private.war_today();
@@ -90,6 +108,20 @@ begin
        = (select (x ->> 'count')::int from jsonb_array_elements(h -> 'topics') x where x ->> 'slug' = v_topic),
          'topic filter matches the topic count';
   raise notice 'history ok: % questions, % topics', h ->> 'total', jsonb_array_length(h -> 'topics');
+end $$;
+
+-- 4. Topic setting API: save (deduplicated, sorted), read back, reject junk, clear to random.
+do $$
+begin
+  assert public.get_war_settings() = '{"topics": []}'::jsonb;
+  assert public.set_war_topics('{string,array,string}') = '{"topics": ["array", "string"]}'::jsonb;
+  assert public.get_war_settings() = '{"topics": ["array", "string"]}'::jsonb;
+  begin
+    perform public.set_war_topics('{"Not A Slug"}');
+    raise exception 'invalid topic accepted';
+  exception when invalid_parameter_value then null;
+  end;
+  assert public.set_war_topics('{}') = '{"topics": []}'::jsonb;
 end $$;
 
 rollback;

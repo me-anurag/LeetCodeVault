@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard'
 import QuestionDetail from './pages/QuestionDetail'
 import History from './pages/History'
 import Streak from './pages/Streak'
+import TopicFocus from './pages/TopicFocus'
 import War from './pages/War'
 
 function Protected({ children }) {
@@ -47,6 +48,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/war/:date" element={<Protected><War /></Protected>} />
           <Route path="/streak" element={<Protected><Streak /></Protected>} />
           <Route path="/history" element={<Protected><History /></Protected>} />
+          <Route path="/topics" element={<Protected><TopicFocus /></Protected>} />
           <Route path="/library" element={<Protected><Dashboard /></Protected>} />
           <Route path="/questions/:id" element={<Protected><QuestionDetail /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />

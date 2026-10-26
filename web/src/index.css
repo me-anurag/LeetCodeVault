@@ -74,6 +74,8 @@ code, pre, textarea, .font-mono {
 .reader .io.input { @apply border-sky-300 bg-sky-50; }
 .reader .io.output { @apply border-emerald-300 bg-emerald-50; }
 .reader .io code { @apply border-0 bg-transparent p-0; }
+/* Phones: wrap long code lines instead of scrolling sideways (copying still gives the original code). */
+html.phone .reader pre { @apply whitespace-pre-wrap break-words; }
 .reader details > summary { @apply cursor-pointer list-none select-none; }
 .reader details > summary::-webkit-details-marker { display: none; }
 .reader details > summary .chevron { @apply inline-block transition-transform; }
