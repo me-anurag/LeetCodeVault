@@ -64,7 +64,10 @@ export async function getQuestion(id) {
   const data = await run(
     supabase
       .from('questions')
-      .select('*, language_versions:question_language_versions(*), solutions:personal_solutions(*)')
+      .select(
+        '*, language_versions:question_language_versions(*), solutions:personal_solutions(*),' +
+          ' war_items:daily_war_items(id, done_at, war:daily_wars(war_date, deadline))',
+      )
       .eq('id', id)
       .order('saved_at', { referencedTable: 'question_language_versions', ascending: true })
       .order('updated_at', { referencedTable: 'personal_solutions', ascending: false })
@@ -73,6 +76,17 @@ export async function getQuestion(id) {
   if (!data) throw new ApiError('not_found', 'Question not found.')
   return data
 }
+
+// --- daily wars ------------------------------------------------------------------------------------------------------
+
+// date: 'YYYY-MM-DD' or undefined for today's war.
+export const getWar = (date) => run(supabase.rpc('get_war', date ? { p_date: date } : {}))
+
+export const getWarDays = (from, to) => run(supabase.rpc('war_days', { p_from: from, p_to: to }))
+
+export const getStreak = () => run(supabase.rpc('war_streak'))
+
+export const setWarDone = (itemId, done) => run(supabase.rpc('set_war_item_done', { p_item: itemId, p_done: done }))
 
 // --- writes (only notes, solutions and deletions; the original question is read-only) ---------------------------------
 

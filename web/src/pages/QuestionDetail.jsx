@@ -6,6 +6,10 @@ import {
 } from '../api'
 import CodeBlock from '../components/CodeBlock'
 import { Button, Difficulty, ErrorBox, Loading, Tag, formatDate, inputClass } from '../components/ui'
+import PhoneQuestion from '../phone/PhoneQuestion'
+import { useUnsaved } from '../pwa'
+import { useIsPhone } from '../theme'
+import WarDone from '../war/WarDone'
 
 // Statement images are hosted by LeetCode; open links in a new tab.
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -17,9 +21,9 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 
 function Section({ title, children, right }) {
   return (
-    <section className="mt-8">
+    <section className={title ? 'mt-8' : ''}>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</h2>
+        {title && <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</h2>}
         {right}
       </div>
       {children}
@@ -30,6 +34,7 @@ function Section({ title, children, right }) {
 export default function QuestionDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const isPhone = useIsPhone()
   const [question, setQuestion] = useState(null)
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('statement')
@@ -58,14 +63,12 @@ export default function QuestionDetail() {
   if (error && !question) {
     return (
       <div className="pt-6">
-        <Link to="/" className="text-sm text-zinc-500 hover:underline">← Library</Link>
+        <Link to="/library" className="text-sm text-zinc-500 hover:underline">← Library</Link>
         <ErrorBox error={error} onRetry={error.code === 'not_found' ? null : load} />
       </div>
     )
   }
   if (!question) return <Loading />
-
-  const version = question.language_versions.find((v) => v.language === lang)
 
   const removeLanguage = async (v) => {
     if (!window.confirm(`Remove the saved ${v.language_name} starter code?`)) return
@@ -83,10 +86,18 @@ export default function QuestionDetail() {
       return
     try {
       await removeQuestion(id)
-      navigate('/', { replace: true })
+      navigate('/library', { replace: true })
     } catch (err) {
       setError(err)
     }
+  }
+
+  if (isPhone) {
+    return (
+      <PhoneQuestion question={question} statementHtml={statementHtml} error={error} reload={load}
+        lang={lang} setLang={setLang} onRemoveLanguage={removeLanguage} onDelete={deleteQuestion}
+        onNotesSaved={(notes) => setQuestion({ ...question, personal_notes: notes })} />
+    )
   }
 
   const tabs = [
@@ -97,7 +108,7 @@ export default function QuestionDetail() {
 
   return (
     <article className="mx-auto max-w-3xl pt-5">
-      <Link to="/" className="text-sm text-zinc-500 hover:underline">← Library</Link>
+      <Link to="/library" className="text-sm text-zinc-500 hover:underline">← Library</Link>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight">
         {question.frontend_id && <span className="mr-2 text-zinc-500">{question.frontend_id}.</span>}
         {question.title}
@@ -105,7 +116,7 @@ export default function QuestionDetail() {
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
         <Difficulty value={question.difficulty} />
         {question.topics.map((t) => (
-          <Link key={t.slug} to={`/?topic=${t.slug}`}><Tag>{t.name}</Tag></Link>
+          <Link key={t.slug} to={`/library?topic=${t.slug}`}><Tag>{t.name}</Tag></Link>
         ))}
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500">
@@ -150,34 +161,12 @@ export default function QuestionDetail() {
       )}
 
       <Section title="Starter code">
-        {question.language_versions.length === 0 ? (
-          <p className="text-sm text-zinc-500">No starter code saved. Save a language from the extension.</p>
-        ) : (
-          <>
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {question.language_versions.map((v) => (
-                <Tag key={v.language} active={v.language === lang} onClick={() => setLang(v.language)}>
-                  {v.language_name}
-                </Tag>
-              ))}
-            </div>
-            {version && (
-              <>
-                <CodeBlock code={version.starter_code} language={version.language}
-                  actions={
-                    <button type="button" className="text-zinc-500 hover:text-rose-600" onClick={() => removeLanguage(version)}>
-                      Remove
-                    </button>
-                  } />
-                <p className="mt-1 text-xs text-zinc-500">Saved {formatDate(version.saved_at, true)}</p>
-              </>
-            )}
-          </>
-        )}
+        <StarterCode question={question} lang={lang} setLang={setLang} onRemove={removeLanguage} />
       </Section>
 
       <Notes question={question} onSaved={(notes) => setQuestion({ ...question, personal_notes: notes })} />
       <Solutions question={question} reload={load} />
+      <WarDone key={question.id} question={question} />
 
       <div className="mt-12 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <Button variant="danger" onClick={deleteQuestion}>Delete question</Button>
@@ -186,10 +175,40 @@ export default function QuestionDetail() {
   )
 }
 
-function Notes({ question, onSaved }) {
+export function StarterCode({ question, lang, setLang, onRemove }) {
+  const version = question.language_versions.find((v) => v.language === lang)
+  if (question.language_versions.length === 0) {
+    return <p className="text-sm text-zinc-500">No starter code saved. Save a language from the extension.</p>
+  }
+  return (
+    <>
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        {question.language_versions.map((v) => (
+          <Tag key={v.language} active={v.language === lang} onClick={() => setLang(v.language)}>
+            {v.language_name}
+          </Tag>
+        ))}
+      </div>
+      {version && (
+        <>
+          <CodeBlock code={version.starter_code} language={version.language}
+            actions={
+              <button type="button" className="text-zinc-500 hover:text-rose-600" onClick={() => onRemove(version)}>
+                Remove
+              </button>
+            } />
+          <p className="mt-1 text-xs text-zinc-500">Saved {formatDate(version.saved_at, true)}</p>
+        </>
+      )}
+    </>
+  )
+}
+
+export function Notes({ question, onSaved, bare }) {
   const [notes, setNotes] = useState(question.personal_notes)
   const [state, setState] = useState({ status: 'idle' })
   const dirty = notes !== question.personal_notes
+  useUnsaved(dirty)
 
   useEffect(() => setNotes(question.personal_notes), [question.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -205,7 +224,7 @@ function Notes({ question, onSaved }) {
   }
 
   return (
-    <Section title="My notes"
+    <Section title={bare ? null : 'My notes'}
       right={<span className="text-xs text-zinc-500">{state.status === 'saved' && !dirty ? 'Saved' : dirty ? 'Unsaved changes' : ''}</span>}>
       <textarea className={`${inputClass} min-h-28 font-mono text-[13px]`} value={notes}
         placeholder="Observations, patterns, edge cases…" onChange={(e) => setNotes(e.target.value)} />
@@ -219,12 +238,12 @@ function Notes({ question, onSaved }) {
   )
 }
 
-function Solutions({ question, reload }) {
+export function Solutions({ question, reload, bare }) {
   const [editing, setEditing] = useState(null) // null | 'new' | solution id
   const languages = question.language_versions
 
   return (
-    <Section title="My solutions"
+    <Section title={bare ? null : 'My solutions'}
       right={editing !== 'new' && <Button onClick={() => setEditing('new')}>Add solution</Button>}>
       {editing === 'new' && (
         <SolutionForm questionId={question.id} languages={languages}
@@ -286,6 +305,7 @@ function SolutionForm({ questionId, languages, initial, onDone, onCancel }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
+  useUnsaved(['language', 'solution_code', 'notes'].some((k) => form[k] !== initial[k]))
 
   const submit = async () => {
     setBusy(true)

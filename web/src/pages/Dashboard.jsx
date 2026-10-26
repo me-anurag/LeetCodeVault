@@ -1,22 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { getStats, listQuestions } from '../api'
-import { Button, Difficulty, ErrorBox, Loading, Tag, formatDate, inputClass } from '../components/ui'
+import { Button, Difficulty, ErrorBox, Loading, Tag, formatDate, inputClass, useOnFocus } from '../components/ui'
+import PhoneLibrary from '../phone/PhoneLibrary'
+import { useIsPhone } from '../theme'
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard']
 const csv = (v) => (v ? v.split(',').filter(Boolean) : [])
 
-// Refetch when the tab regains focus, so questions saved from the extension show up without a manual reload.
-function useOnFocus(fn) {
-  useEffect(() => {
-    const onVisible = () => document.visibilityState === 'visible' && fn()
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [fn])
-}
 
 export default function Dashboard() {
   const [params, setParams] = useSearchParams()
+  const location = useLocation()
+  const isPhone = useIsPhone()
   const q = params.get('q') || ''
   const difficulty = csv(params.get('difficulty'))
   const topics = params.getAll('topic')
@@ -43,10 +39,15 @@ export default function Dashboard() {
         else if (v) next.set(k, v)
       }
       if (resetPage) next.delete('page')
-      setParams(next, { replace: true })
+      setParams(next, { replace: true, state: location.state }) // keeps the phone filter sheet open
     },
-    [params, setParams],
+    [params, setParams, location.state],
   )
+
+  const clear = () => {
+    setSearch('')
+    setParams({}, { replace: true, state: location.state })
+  }
 
   // Debounced search box -> URL.
   useEffect(() => {
@@ -90,6 +91,13 @@ export default function Dashboard() {
 
   const toggle = (key, values, value) =>
     update({ [key]: values.includes(value) ? values.filter((v) => v !== value) : [...values, value] })
+
+  if (isPhone) {
+    return (
+      <PhoneLibrary {...{ q, search, setSearch, difficulty, topics, language, sort, page, filtersActive, list, listError,
+        loading, loadList, stats, statsError, loadStats, update, toggle, clear }} />
+    )
+  }
 
   const topicList = stats?.topics || []
   const visibleTopics = showAllTopics ? topicList : topicList.slice(0, 12)
@@ -159,7 +167,7 @@ export default function Dashboard() {
           ))}
           {filtersActive ? (
             <button type="button" className="text-xs text-zinc-500 hover:underline"
-              onClick={() => { setSearch(''); setParams({}, { replace: true }) }}>
+              onClick={clear}>
               Clear
             </button>
           ) : null}

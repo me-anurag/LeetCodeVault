@@ -37,8 +37,8 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <img src="/logo.svg" alt="" className="h-7 w-7" />
-          LeetVault
+          <img src="/logo.png" alt="" className="h-7 w-7" />
+          DailyWars
         </div>
         <p className="text-sm text-zinc-500">
           {mode === 'login' ? 'Log in to your question library.' : 'Create your account.'}

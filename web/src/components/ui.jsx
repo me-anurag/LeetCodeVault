@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth'
+import { useIsPhone } from '../theme'
 
 const DIFF_STYLE = {
   Easy: 'text-emerald-600 dark:text-emerald-400',
@@ -69,6 +71,15 @@ export function ErrorBox({ error, onRetry }) {
   )
 }
 
+// Run fn when the tab regains focus, so changes made elsewhere (extension, another device) show up.
+export function useOnFocus(fn) {
+  useEffect(() => {
+    const onVisible = () => document.visibilityState === 'visible' && fn()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [fn])
+}
+
 export function formatDate(iso, withTime = false) {
   if (!iso) return ''
   const d = new Date(iso)
@@ -79,16 +90,25 @@ export function formatDate(iso, withTime = false) {
 
 export function Layout({ children }) {
   const { user, logout } = useAuth()
+  const isPhone = useIsPhone()
+  if (isPhone) return children // phone pages draw their own minimal top bar
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-4 pb-16">
       <header className="flex items-center justify-between gap-3 border-b border-zinc-200 py-3 dark:border-zinc-800">
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <img src="/logo.svg" alt="" className="h-6 w-6" />
-          LeetVault
+          <img src="/logo.png" alt="" className="h-6 w-6" />
+          DailyWars
         </Link>
         {user && (
+          <nav className="flex items-center gap-5 text-sm">
+            <Link to="/" className="hover:underline">War</Link>
+            <Link to="/streak" className="hover:underline">Streak</Link>
+            <Link to="/library" className="hover:underline">Library</Link>
+          </nav>
+        )}
+        {user && (
           <div className="flex min-w-0 items-center gap-3 text-sm">
-            <span className="hidden truncate text-zinc-500 sm:inline">{user.email}</span>
+            <span className="hidden truncate text-zinc-500 lg:inline">{user.email}</span>
             <Button variant="ghost" onClick={logout}>
               Log out
             </Button>

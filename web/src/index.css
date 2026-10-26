@@ -1,13 +1,40 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: light dark;
+/* `dark` is a class set by src/theme.js (system dark mode, desktop only), so phones always stay light. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Phone reader palette: warm paper and soft ink. */
+@theme {
+  --color-paper: #f6f3ec;
+  --color-paper-2: #ece7dc;
+  --color-line: #e0d9cb;
+  --color-ink: #2f2c27;
+  --color-ink-soft: #5a554c;
+  --color-muted: #8b8579;
+}
+
+:root { color-scheme: light; }
+:root.dark {
+  color-scheme: dark;
+  /* Desktop dark mode: the war screens use the same tokens, so give them dark values. */
+  --color-paper: #09090b;
+  --color-paper-2: #18181b;
+  --color-line: #27272a;
+  --color-ink: #f4f4f5;
+  --color-ink-soft: #d4d4d8;
+  --color-muted: #a1a1aa;
 }
 
 body {
   @apply bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+html.phone body {
+  @apply bg-paper text-ink;
+  -webkit-tap-highlight-color: transparent;
+}
+/* 16px+ stops iOS from zooming into form fields. */
+html.phone input, html.phone textarea, html.phone select { font-size: 16px; }
 
 code, pre, textarea, .font-mono {
   font-family: ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
@@ -40,6 +67,20 @@ code, pre, textarea, .font-mono {
 }
 .statement .example-block p { @apply my-2; }
 .statement .example-io { @apply font-mono; }
+
+/* Phone reader: larger, calmer text and warm code blocks. */
+.reader .statement { @apply text-[17px] leading-[1.75] text-ink; }
+.reader .statement p:first-child { @apply mt-0; }
+.reader .statement code { @apply border-line bg-paper-2 text-[14px]; }
+.reader .statement img { @apply rounded-lg bg-transparent mix-blend-multiply; } /* white diagrams take the paper tone */
+.reader .io {
+  @apply overflow-x-auto rounded-lg bg-paper-2 px-3.5 py-2.5 font-mono text-[14px] leading-6 text-ink;
+}
+.reader .io code { @apply border-0 bg-transparent p-0; }
+.reader details > summary { @apply cursor-pointer list-none select-none; }
+.reader details > summary::-webkit-details-marker { display: none; }
+.reader details > summary .chevron { @apply inline-block transition-transform; }
+.reader details[open] > summary .chevron { @apply rotate-90; }
 
 /* highlight.js tokens, monochrome-leaning. */
 .hljs { color: inherit; background: transparent; }

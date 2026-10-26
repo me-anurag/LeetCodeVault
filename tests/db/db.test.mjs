@@ -275,3 +275,25 @@ test('delete language version and question (cascades); re-save works', async () 
   assert.equal(await detail(u, data.question_id), undefined)
   assert.equal((await save(u, twoSum())).data.status, 'created')
 })
+
+// --- daily wars ------------------------------------------------------------------------------------------------------
+// Filling a war needs LeetCode, so these cover the API around it; tests/db/war.sql covers the generator.
+
+test('war API: empty state, access control, done button only on own items', async () => {
+  const u = await newUser()
+  const war = (await rpc(u, 'get_war', {})).data
+  assert.equal(war.exists, false)
+  assert.deepEqual(war.items, [])
+  assert.deepEqual(war.streak, { current: 0, best: 0, won: 0 })
+  assert.match(war.date, /^\d{4}-\d{2}-\d{2}$/)
+  assert.ok(Date.parse(war.deadline) > Date.parse(war.starts_at))
+  assert.deepEqual((await rpc(u, 'war_days', {})).data, [])
+  assert.notEqual((await rpc(null, 'get_war', {})).status, 200)
+  assert.equal((await rpc(u, 'set_war_item_done', { p_item: 999999999, p_done: true })).status, 404)
+  // Wars can't be created or edited directly.
+  const direct = await call('POST', '/rest/v1/daily_wars', { token: u.token, body: { war_date: '2026-01-01', deadline: new Date().toISOString() } })
+  assert.notEqual(direct.status, 201)
+  // The generator is not reachable through the API.
+  assert.notEqual((await rpc(u, 'generate_daily_wars', {})).status, 200)
+  assert.notEqual((await rpc(u, 'fill_war', { uid: u.id })).status, 200)
+})

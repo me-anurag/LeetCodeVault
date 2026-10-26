@@ -8,6 +8,23 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# The service worker and manifest must always be re-checked, so installed apps pick up new versions.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Built JS/CSS have content hashes in their names, so they never change.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Client-side routes (/questions/123) must serve index.html.
 [[redirects]]
   from = "/*"
