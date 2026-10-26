@@ -19,14 +19,28 @@ export function Difficulty({ value, className = '' }) {
   )
 }
 
+const PILL = {
+  Easy: 'bg-emerald-100 text-emerald-700',
+  Medium: 'bg-amber-100 text-amber-700',
+  Hard: 'bg-rose-100 text-rose-700',
+}
+
+export function DifficultyPill({ value }) {
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold normal-case tracking-normal ${PILL[value] || ''}`}>
+      {value}
+    </span>
+  )
+}
+
 export function Tag({ children, active, onClick, title }) {
-  const base = 'inline-flex items-center rounded border px-1.5 py-px text-[11px] leading-5 whitespace-nowrap'
+  const base = 'inline-flex items-center rounded-full border px-2 py-px text-[11px] leading-5 whitespace-nowrap'
   const tone = active
-    ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
-    : 'border-zinc-200 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400'
+    ? 'border-orange-500 bg-orange-500 text-white'
+    : 'border-violet-200 bg-violet-50 text-violet-700'
   if (!onClick) return <span className={`${base} ${tone}`}>{children}</span>
   return (
-    <button type="button" title={title} onClick={onClick} className={`${base} ${tone} hover:border-zinc-500`}>
+    <button type="button" title={title} onClick={onClick} className={`${base} ${tone} hover:border-orange-400`}>
       {children}
     </button>
   )
@@ -36,8 +50,7 @@ export function Button({ variant = 'default', className = '', ...props }) {
   const styles = {
     default:
       'border border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900',
-    primary:
-      'border border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300',
+    primary: 'btn-sun border border-transparent font-medium hover:brightness-105',
     danger: 'border border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950',
     ghost: 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
   }

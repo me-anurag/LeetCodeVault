@@ -96,30 +96,41 @@ function WarBody({ war, now, error, onRetry }) {
 
   return (
     <>
-      <div className="pt-5">
-        <p className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted">
+      <div className={`mt-4 rounded-3xl bg-linear-to-br p-5 ${won
+        ? 'from-emerald-100 via-teal-50 to-sky-100'
+        : 'from-amber-100 via-orange-100 to-pink-100'}`}>
+        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-orange-700/80">
           {formatDay(war.date, { weekday: 'long' })}
         </p>
-        <h1 className="mt-1 text-[26px] font-semibold tracking-tight">{isToday ? "Today's war" : 'War'}</h1>
-        <p className={`mt-1 text-[15px] ${won ? 'text-emerald-700 dark:text-emerald-400' : 'text-ink-soft'}`}>{status}</p>
+        <h1 className="mt-1 text-[28px] font-bold tracking-tight">
+          {won ? 'Victory! 🎉' : isToday ? "Today's war ⚔️" : 'War'}
+        </h1>
+        <p className={`mt-1 text-[15px] ${won ? 'text-emerald-800' : 'text-ink-soft'}`}>{status}</p>
         {isToday && ended && (
-          <p className="mt-1 text-[15px] text-muted">Next war at {formatTime(war.next_start)}.</p>
+          <p className="mt-1 text-[15px] text-ink-soft">Next war at {formatTime(war.next_start)}.</p>
+        )}
+
+        {total > 0 && (
+          <>
+            <div className="mt-4 flex items-baseline justify-between text-sm">
+              <span>
+                <span className="text-[24px] font-bold tabular-nums">{done}</span>
+                <span className="text-ink-soft"> / {total} done</span>
+              </span>
+              <span className="rounded-full bg-white/70 px-2.5 py-1 font-medium text-orange-700">
+                🔥 {war.streak.current} day{war.streak.current === 1 ? '' : 's'}
+              </span>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70">
+              <div className={`h-full rounded-full bg-linear-to-r transition-all duration-500 ${won
+                ? 'from-emerald-400 to-teal-500'
+                : 'from-orange-400 via-pink-500 to-violet-500'}`}
+                style={{ width: `${(done / total) * 100}%` }} />
+            </div>
+          </>
         )}
       </div>
       <ErrorBox error={error} onRetry={onRetry} />
-
-      {total > 0 && (
-        <div className="mt-5">
-          <div className="flex items-baseline justify-between text-sm">
-            <span><span className="text-[20px] font-semibold tabular-nums">{done}</span><span className="text-muted"> / {total} done</span></span>
-            <span className="text-muted">Streak {war.streak.current} · best {war.streak.best}</span>
-          </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-paper-2">
-            <div className={`h-full rounded-full transition-all ${won ? 'bg-emerald-500' : 'bg-ink'}`}
-              style={{ width: `${(done / total) * 100}%` }} />
-          </div>
-        </div>
-      )}
 
       {total > 0 && (
         <ul className="mt-6 border-t border-line">

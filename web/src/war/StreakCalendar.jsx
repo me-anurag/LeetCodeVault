@@ -38,9 +38,9 @@ export default function StreakCalendar({ onPick }) {
   return (
     <div className="text-ink">
       <div className="grid grid-cols-3 gap-2 text-center">
-        <Stat value={streak?.current} label="Current streak" />
-        <Stat value={streak?.best} label="Best streak" />
-        <Stat value={streak?.won} label="Wars won" />
+        <Stat value={streak?.current} label="🔥 Current streak" tone="from-orange-100 to-amber-50 text-orange-700" />
+        <Stat value={streak?.best} label="🏆 Best streak" tone="from-violet-100 to-fuchsia-50 text-violet-700" />
+        <Stat value={streak?.won} label="⚔️ Wars won" tone="from-emerald-100 to-teal-50 text-emerald-700" />
       </div>
 
       <div className="mt-6 flex items-center justify-between">
@@ -73,11 +73,11 @@ export default function StreakCalendar({ onPick }) {
   )
 }
 
-function Stat({ value, label }) {
+function Stat({ value, label, tone }) {
   return (
-    <div className="rounded-xl bg-paper-2 px-2 py-3">
-      <div className="text-[22px] font-semibold tabular-nums">{value ?? '–'}</div>
-      <div className="text-xs text-muted">{label}</div>
+    <div className={`rounded-2xl bg-linear-to-br px-2 py-3 ${tone}`}>
+      <div className="text-[24px] font-bold tabular-nums">{value ?? '–'}</div>
+      <div className="text-[11px] font-medium opacity-80">{label}</div>
     </div>
   )
 }

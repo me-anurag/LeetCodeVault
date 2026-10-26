@@ -30,11 +30,13 @@ export default function WarDone({ question }) {
   }
 
   return (
-    <section className="mt-12 rounded-xl border border-line p-4 text-center">
+    <section className={`mt-12 rounded-2xl border p-4 text-center ${doneAt
+      ? 'border-emerald-200 bg-emerald-50'
+      : 'border-orange-200 bg-linear-to-br from-amber-50 to-pink-50'}`}>
       {doneAt ? (
         <>
-          <p className={`text-[16px] font-medium ${late ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
-            ✓ Done{late ? ' late' : ''} · {formatTime(doneAt)}{isToday ? '' : `, ${new Date(doneAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
+          <p className={`text-[16px] font-semibold ${late ? 'text-amber-700' : 'text-emerald-700'}`}>
+            {late ? '✓' : '🎉'} Done{late ? ' late' : ''} · {formatTime(doneAt)}{isToday ? '' : `, ${new Date(doneAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
           </p>
           <button type="button" disabled={busy} onClick={() => toggle(false)}
             className="mt-2 text-sm text-muted underline underline-offset-2">Undo</button>
@@ -45,7 +47,7 @@ export default function WarDone({ question }) {
             Press only after you understood it and wrote the code yourself.
           </p>
           <button type="button" disabled={busy} onClick={() => toggle(true)}
-            className="mt-3 w-full rounded-lg bg-ink py-3 text-[16px] font-medium text-paper active:opacity-80 disabled:opacity-50">
+            className="btn-sun mt-3 w-full rounded-xl py-3 text-[16px] font-semibold disabled:opacity-50">
             {busy ? 'Saving…' : 'I solved it'}
           </button>
         </>

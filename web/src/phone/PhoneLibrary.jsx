@@ -86,7 +86,7 @@ export default function PhoneLibrary({
         <Sheet title="Search & filter" onClose={sheet.close}
           footer={
             <button type="button" onClick={sheet.close}
-              className="w-full rounded-lg bg-ink py-3 text-[16px] font-medium text-paper active:opacity-80">
+              className="btn-sun w-full rounded-xl py-3 text-[16px] font-semibold">
               {loading || !list ? 'Searching…' : `Show ${plural(list.total, 'question')}`}
             </button>
           }>
@@ -159,7 +159,7 @@ function Group({ title, children }) {
 }
 
 function Chip({ active, onClick, children }) {
-  const tone = active ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft'
+  const tone = active ? 'border-orange-500 bg-orange-500 text-white' : 'border-line bg-white/60 text-ink-soft'
   return (
     <button type="button" onClick={onClick} className={`rounded-full border px-3 py-1.5 text-sm ${tone}`}>
       {children}

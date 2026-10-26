@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth'
-import { Difficulty, ErrorBox, Tag, formatDate } from '../components/ui'
+import { DifficultyPill, ErrorBox, Tag, formatDate } from '../components/ui'
 import { Notes, Solutions, StarterCode } from '../pages/QuestionDetail'
 import { MenuItem, Sheet, TopBar, useSheet } from './Sheet'
 import { splitStatement } from './statement'
@@ -22,10 +22,9 @@ export default function PhoneQuestion({
       <TopBar onMenu={() => sheet.show('menu')} />
 
       <article className="pt-5">
-        <p className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-[0.08em] text-muted">
+        <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-orange-600">
           Question{q.frontend_id ? ` ${q.frontend_id}` : ''}
-          <span aria-hidden>·</span>
-          <Difficulty value={q.difficulty} className="normal-case tracking-normal" />
+          <DifficultyPill value={q.difficulty} />
         </p>
         <h1 className="mt-1.5 text-[24px] font-semibold leading-snug tracking-tight">{q.title}</h1>
         <ErrorBox error={error} />
@@ -33,7 +32,7 @@ export default function PhoneQuestion({
         {parts.intro && <Html className="statement mt-5" html={parts.intro} />}
         {parts.examples.map((ex, i) => <Example key={i} example={ex} />)}
         {parts.constraints && (
-          <Block title="Constraints">
+          <Block title="Constraints" tone="text-orange-600">
             <Html className="statement" html={parts.constraints} />
           </Block>
         )}
@@ -94,10 +93,10 @@ export default function PhoneQuestion({
 // Content comes from the statement already sanitized by DOMPurify (see QuestionDetail).
 const Html = ({ html, className }) => <div className={className} dangerouslySetInnerHTML={{ __html: html }} />
 
-function Block({ title, children }) {
+function Block({ title, tone = 'text-violet-600', children }) {
   return (
     <section className="mt-8">
-      <h2 className="mb-2.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-muted">{title}</h2>
+      <h2 className={`mb-2.5 text-[13px] font-bold uppercase tracking-[0.08em] ${tone}`}>{title}</h2>
       {children}
     </section>
   )
@@ -105,9 +104,9 @@ function Block({ title, children }) {
 
 function Collapse({ title, children }) {
   return (
-    <details className="rounded-lg border border-line">
-      <summary className="flex items-center gap-2 px-3.5 py-2.5 text-[15px] text-ink-soft">
-        <span className="chevron text-muted" aria-hidden>›</span>
+    <details className="rounded-xl border border-violet-200 bg-violet-50/60">
+      <summary className="flex items-center gap-2 px-3.5 py-2.5 text-[15px] font-medium text-violet-700">
+        <span className="chevron" aria-hidden>›</span>
         {title}
       </summary>
       <div className="px-3.5 pb-3">{children}</div>
@@ -115,12 +114,13 @@ function Collapse({ title, children }) {
   )
 }
 
-function Field({ label, html }) {
+function Field({ label, html, kind }) {
   if (!html) return null
+  const color = kind === 'input' ? 'text-sky-700' : 'text-emerald-700'
   return (
     <div className="mb-2.5">
-      <p className="mb-1 text-[13px] text-muted">{label}</p>
-      <Html className="io whitespace-pre-wrap" html={html} />
+      <p className={`mb-1 text-[13px] font-medium ${color}`}>{label}</p>
+      <Html className={`io ${kind} whitespace-pre-wrap`} html={html} />
     </div>
   )
 }
@@ -136,8 +136,8 @@ function Example({ example }) {
   return (
     <Block title={example.title}>
       {example.figure && <Html className="statement mb-3" html={example.figure} />}
-      <Field label="Input" html={example.input} />
-      <Field label="Output" html={example.output} />
+      <Field label="Input" html={example.input} kind="input" />
+      <Field label="Output" html={example.output} kind="output" />
       {example.explanation && (
         <div className="mt-3">
           <Collapse title="Explanation">
