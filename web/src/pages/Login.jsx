@@ -13,7 +13,8 @@ export default function Login() {
   const [notice, setNotice] = useState(null)
   const [busy, setBusy] = useState(false)
 
-  if (status === 'authenticated') return <Navigate to={location.state?.from?.pathname || '/'} replace />
+  const from = location.state?.from
+  if (status === 'authenticated') return <Navigate to={from ? from.pathname + (from.search || '') : '/'} replace />
 
   const submit = async (e) => {
     e.preventDefault()

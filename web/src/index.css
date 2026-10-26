@@ -81,6 +81,51 @@ html.phone .reader pre { @apply whitespace-pre-wrap break-words; }
 .reader details > summary .chevron { @apply inline-block transition-transform; }
 .reader details[open] > summary .chevron { @apply rotate-90; }
 
+/* Printable question document (/print), saved as PDF from the browser's print dialog. */
+.doc { font-size: 15px; line-height: 1.6; }
+.doc h1 { @apply mt-2 text-3xl font-bold tracking-tight; }
+.doc h2 { @apply text-2xl font-bold tracking-tight; }
+.doc h3 { @apply mt-6 mb-2 text-xs font-bold uppercase tracking-[0.08em] text-violet-700; }
+.doc .doc-brand { @apply text-sm font-bold uppercase tracking-[0.12em] text-orange-600; }
+.doc .doc-meta { @apply mt-1 text-sm text-zinc-500; }
+.doc .doc-link { @apply break-all text-xs; }
+.doc .doc-diff { @apply rounded-full px-2 py-0.5 text-xs font-semibold; }
+.doc .doc-diff.Easy { @apply bg-emerald-100 text-emerald-800; }
+.doc .doc-diff.Medium { @apply bg-amber-100 text-amber-800; }
+.doc .doc-diff.Hard { @apply bg-rose-100 text-rose-800; }
+.doc .doc-cover { @apply mb-10 border-b-2 border-orange-200 pb-6; }
+.doc .doc-toc { @apply mt-5 list-decimal space-y-1 pl-6 text-[15px]; }
+.doc .doc-toc span { @apply text-zinc-500; }
+.doc .doc-question + .doc-question,
+.doc .doc-cover + .doc-question { @apply mt-12 border-t-2 border-orange-200 pt-8; }
+.doc .statement { @apply mt-3 text-[15px] leading-relaxed; }
+.doc .statement img { @apply max-h-72 w-auto; }
+.doc .doc-example { break-inside: avoid; }
+.doc .doc-field { @apply mt-2; }
+.doc .doc-field > span { @apply mb-1 block text-xs font-semibold text-zinc-500; }
+.doc .doc-mono {
+  @apply whitespace-pre-wrap break-words rounded-md border-l-4 border-sky-300 bg-sky-50 px-3 py-2 font-mono text-[13px] leading-6;
+}
+.doc .doc-mono.output { @apply border-emerald-300 bg-emerald-50; }
+.doc .doc-mono.explanation { @apply border-violet-300 bg-violet-50; }
+.doc .doc-code pre {
+  @apply whitespace-pre-wrap break-words rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-[12.5px] leading-6;
+  break-inside: avoid;
+}
+
+@page { size: A4; margin: 14mm 13mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .no-print { display: none !important; }
+  .doc { max-width: none; padding: 0; font-size: 11pt; }
+  .doc .statement { font-size: 11pt; }
+  /* Every question starts on a new page. */
+  .doc .doc-cover + .doc-question,
+  .doc .doc-question + .doc-question { break-before: page; margin-top: 0; border-top: 0; padding-top: 0; }
+  .doc * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .doc h3 { break-after: avoid; }
+}
+
 /* highlight.js tokens, monochrome-leaning. */
 .hljs { color: inherit; background: transparent; }
 .hljs-keyword, .hljs-built_in, .hljs-type, .hljs-literal { @apply text-sky-700 dark:text-sky-300; }

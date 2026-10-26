@@ -11,16 +11,18 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import QuestionDetail from './pages/QuestionDetail'
 import History from './pages/History'
+import PrintQuestions from './pages/PrintQuestions'
 import Streak from './pages/Streak'
 import TopicFocus from './pages/TopicFocus'
 import War from './pages/War'
 
-function Protected({ children }) {
+// `bare`: no app header (the printable PDF page).
+function Protected({ children, bare }) {
   const { status } = useAuth()
   const location = useLocation()
-  if (status === 'checking') return <Layout><Loading /></Layout>
+  if (status === 'checking') return bare ? <Loading /> : <Layout><Loading /></Layout>
   if (status !== 'authenticated') return <Navigate to="/login" replace state={{ from: location }} />
-  return <Layout>{children}</Layout>
+  return bare ? children : <Layout>{children}</Layout>
 }
 
 function NotConfigured() {
@@ -49,6 +51,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/streak" element={<Protected><Streak /></Protected>} />
           <Route path="/history" element={<Protected><History /></Protected>} />
           <Route path="/topics" element={<Protected><TopicFocus /></Protected>} />
+          <Route path="/print" element={<Protected bare><PrintQuestions /></Protected>} />
           <Route path="/library" element={<Protected><Dashboard /></Protected>} />
           <Route path="/questions/:id" element={<Protected><QuestionDetail /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />

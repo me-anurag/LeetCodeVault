@@ -67,6 +67,7 @@ export default function PhoneQuestion({
           <MenuItem onClick={() => navigate('/library', { replace: true })}>Library</MenuItem>
           <MenuItem hint={q.personal_notes.trim() ? 'Written' : ''} onClick={() => sheet.show('notes')}>My notes</MenuItem>
           <MenuItem hint={q.solutions.length || ''} onClick={() => sheet.show('solutions')}>My solutions</MenuItem>
+          <MenuItem hint="📄" onClick={() => navigate(`/print?ids=${q.id}`, { replace: true })}>Save as PDF</MenuItem>
           <MenuItem href={q.leetcode_url} hint="↗">Open on LeetCode</MenuItem>
           <MenuItem tone="danger" onClick={onDelete}>Delete question</MenuItem>
           <MenuItem tone="muted" hint={user?.email} onClick={logout}>Log out</MenuItem>

@@ -77,6 +77,14 @@ export async function getQuestion(id) {
   return data
 }
 
+// Full questions (with starter code) for the PDF view, in the order of `ids`.
+export async function getQuestionsByIds(ids) {
+  const rows = await run(
+    supabase.from('questions').select('*, language_versions:question_language_versions(*)').in('id', ids),
+  )
+  return ids.map((id) => rows.find((r) => r.id === id)).filter(Boolean)
+}
+
 // --- daily wars ------------------------------------------------------------------------------------------------------
 
 // date: 'YYYY-MM-DD' or undefined for today's war.

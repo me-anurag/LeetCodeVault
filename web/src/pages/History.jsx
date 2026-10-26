@@ -37,6 +37,8 @@ export default function History() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [allTopics, setAllTopics] = useState(false)
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState([]) // question ids, in tap order
 
   const key = JSON.stringify({ sort, difficulty, topics, limit })
   const load = useCallback(async () => {
@@ -65,6 +67,15 @@ export default function History() {
   }
   const toggle = (k, list, v) => update({ [k]: list.includes(v) ? list.filter((x) => x !== v) : [...list, v] })
   const filtered = difficulty.length > 0 || topics.length > 0
+
+  const selectable = (data?.items || []).filter((i) => i.question_id).map((i) => i.question_id)
+  const toggleSelected = (id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
+  const allSelected = selectable.length > 0 && selectable.every((id) => selected.includes(id))
+  // Keep the list's order (as sorted/filtered on screen) in the document.
+  const savePdf = () => {
+    const ids = selectable.filter((id) => selected.includes(id))
+    navigate(`/print?ids=${ids.join(',')}&title=${encodeURIComponent(`${ids.length} question${ids.length === 1 ? '' : 's'}`)}`)
+  }
 
   const topicList = data?.topics || []
   const shownTopics = allTopics ? topicList : topicList.slice(0, 10)
@@ -95,6 +106,12 @@ export default function History() {
             Clear
           </button>
         )}
+        <button type="button" onClick={() => { setSelecting(!selecting); setSelected([]) }}
+          className={`ml-auto rounded-full border px-3 py-1.5 text-sm font-medium ${selecting
+            ? 'border-orange-500 bg-orange-500 text-white'
+            : 'border-orange-200 bg-orange-50 text-orange-700'}`}>
+          {selecting ? 'Cancel' : '📄 Select for PDF'}
+        </button>
       </div>
 
       {topicList.length > 0 && (
@@ -123,7 +140,10 @@ export default function History() {
         </p>
       ) : (
         <ul className={`mt-4 border-t border-line ${loading ? 'opacity-60' : ''}`}>
-          {data.items.map((item) => <Row key={item.id} item={item} />)}
+          {data.items.map((item) => (
+            <Row key={item.id} item={item} selecting={selecting}
+              checked={selected.includes(item.question_id)} onToggle={() => toggleSelected(item.question_id)} />
+          ))}
         </ul>
       )}
 
@@ -132,6 +152,22 @@ export default function History() {
           className="mt-5 w-full rounded-xl border border-line bg-white/60 py-2.5 text-[15px] font-medium text-ink-soft">
           Show more ({data.total - data.items.length} left)
         </button>
+      )}
+
+      {selecting && <div className="h-24" aria-hidden />}
+      {selecting && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+          <div className="mx-auto flex max-w-xl items-center gap-3">
+            <button type="button" onClick={() => setSelected(allSelected ? [] : selectable)}
+              className="shrink-0 rounded-xl border border-line bg-white/70 px-3 py-3 text-[14px] font-medium text-ink-soft">
+              {allSelected ? 'None' : `Select all (${selectable.length})`}
+            </button>
+            <button type="button" disabled={!selected.length} onClick={savePdf}
+              className="btn-sun flex-1 rounded-xl py-3 text-[16px] font-semibold disabled:opacity-40 disabled:shadow-none">
+              {selected.length ? `Save ${selected.length} as PDF` : 'Tap questions to select'}
+            </button>
+          </div>
+        </div>
       )}
     </>
   )
@@ -153,8 +189,12 @@ export default function History() {
   )
 }
 
-function Row({ item }) {
-  const mark = !item.done_at ? (
+function Row({ item, selecting, checked, onToggle }) {
+  const mark = selecting ? (
+    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-[1.5px] text-[12px] text-white ${checked
+      ? 'border-orange-500 bg-orange-500' : 'border-line bg-white'} ${item.question_id ? '' : 'opacity-30'}`}
+      aria-hidden>{checked ? '✓' : ''}</span>
+  ) : !item.done_at ? (
     <span className="h-5 w-5 shrink-0 rounded-full border-[1.5px] border-line" aria-label="Not solved" />
   ) : (
     <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] text-white ${item.on_time ? 'bg-emerald-500' : 'bg-amber-500'}`}
@@ -177,6 +217,14 @@ function Row({ item }) {
     </>
   )
   const className = 'flex items-start gap-3 border-b border-line py-3 active:opacity-60 [&>span:first-child]:mt-0.5'
+  if (selecting) {
+    return (
+      <li>
+        <button type="button" disabled={!item.question_id} onClick={onToggle} aria-pressed={checked}
+          className={`${className} w-full text-left disabled:cursor-not-allowed`}>{content}</button>
+      </li>
+    )
+  }
   return (
     <li>
       {item.question_id ? (

@@ -125,6 +125,9 @@ export default function QuestionDetail() {
           className="font-medium text-zinc-900 underline-offset-2 hover:underline dark:text-zinc-100">
           Open on LeetCode ↗
         </a>
+        <Link to={`/print?ids=${question.id}`} className="font-medium text-orange-600 underline-offset-2 hover:underline">
+          📄 Save as PDF
+        </Link>
         <span className="break-all">{question.leetcode_url}</span>
       </div>
 

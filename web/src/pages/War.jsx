@@ -116,6 +116,12 @@ function WarBody({ war, now, error, onRetry, focusText }) {
         {isToday && ended && (
           <p className="mt-1 text-[15px] text-ink-soft">Next war at {formatTime(war.next_start)}.</p>
         )}
+        {war.items.some((i) => i.question_id) && (
+          <Link to={`/print?ids=${war.items.filter((i) => i.question_id).map((i) => i.question_id).join(',')}&title=${encodeURIComponent(`War · ${formatDay(war.date, { weekday: 'long', year: 'numeric' })}`)}`}
+            className="mt-2 mr-2 inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-1 text-[13px] font-medium text-orange-700">
+            📄 Save as PDF
+          </Link>
+        )}
         {isToday && focusText && (
           <Link to="/topics" className="mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/70 px-2.5 py-1 text-[13px] font-medium text-violet-700">
             🎯 Focus: {focusText} ›
