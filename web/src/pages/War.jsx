@@ -6,7 +6,8 @@ import { ErrorBox, Loading, useOnFocus } from '../components/ui'
 import { MenuItem, Sheet, TopBar, useSheet } from '../phone/Sheet'
 import { useIsPhone } from '../theme'
 import StreakCalendar from '../war/StreakCalendar'
-import { animalParade, celebrate } from '../war/confetti'
+import { celebrate } from '../war/confetti'
+import WarScene from '../war/WarScene'
 import { formatDay, useNow } from '../war/time'
 import { topicName } from '../war/topics'
 
@@ -97,7 +98,6 @@ function WarBody({ war, now, error, onRetry, focusText }) {
       sessionStorage.setItem(key, '1')
     } catch { /* storage unavailable: celebrate anyway */ }
     celebrate({ big: true })
-    animalParade()
   }, [won, isToday, war.date])
 
   const pdfIds = war.items.filter((i) => i.question_id).map((i) => i.question_id)
@@ -105,27 +105,24 @@ function WarBody({ war, now, error, onRetry, focusText }) {
 
   return (
     <>
-      <div className={`war-hero ${won ? 'won' : ''} relative mt-4 overflow-hidden rounded-3xl px-6 pt-7 pb-12`}>
-        <Bubbles />
-        <span className="flyer" aria-hidden><span>🦋</span></span>
-        <span className="walker" aria-hidden><span>{walkerFor(war.date)}</span></span>
-        <h1 className="relative text-[30px] font-bold tracking-tight">
-          {isToday ? "Today's war" : `War · ${formatDay(war.date)}`} <span className="sway" aria-hidden>{won ? '🏆' : '⚔️'}</span>
-        </h1>
-        {isToday && focusText && (
-          <Link to="/topics" className="relative mt-3 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/75 px-3 py-1.5 text-[14px] font-medium text-violet-700 shadow-sm">
-            🎯 Focus: {focusText} ›
-          </Link>
-        )}
+      <div className={`war-hero ${won ? 'won' : ''} relative mt-4 h-[280px] overflow-hidden rounded-3xl shadow-lg shadow-orange-100 sm:h-[320px]`}>
+        <WarScene seed={war.date} won={won} />
+        <div className="pointer-events-none relative px-6 pt-6">
+          <h1 className="war-title text-[30px] font-bold tracking-tight">
+            {isToday ? "Today's war" : `War · ${formatDay(war.date)}`}
+          </h1>
+          {isToday && focusText && (
+            <Link to="/topics" className="pointer-events-auto mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/80 px-3 py-1.5 text-[14px] font-medium text-violet-700 shadow-sm backdrop-blur">
+              🎯 Focus: {focusText} ›
+            </Link>
+          )}
+        </div>
       </div>
       <ErrorBox error={error} onRetry={onRetry} />
 
       {!total && (
         <div className="mt-8 text-center">
-          {isToday && !ended && (
-            <span className="sleepy" aria-hidden>🐈<span className="z">z</span><span className="z">z</span><span className="z">z</span></span>
-          )}
-          <p className="mt-3 text-[15px] leading-relaxed text-muted">
+          <p className="text-[15px] leading-relaxed text-muted">
             {isToday && !ended
               ? 'Your questions are on their way ☕ They arrive right after 3:00 am.'
               : 'No war on this day.'}
@@ -149,32 +146,6 @@ function WarBody({ war, now, error, onRetry, focusText }) {
       )}
     </>
   )
-}
-
-// The animal strolling across the war card: a different one each day, the same all day.
-const WALKERS = ['🐈', '🐕', '🦊', '🐼', '🐧', '🦔', '🐢', '🐇', '🐿️', '🦆', '🐑', '🦙', '🐘', '🦒']
-function walkerFor(date) {
-  let h = 0
-  for (const c of date) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  return WALKERS[h % WALKERS.length]
-}
-
-// Soft light bubbles drifting inside the war card.
-const BUBBLES = [
-  { size: 90, left: '-6%', top: '-30%', dur: 11, dx: '24px', dy: '18px' },
-  { size: 54, left: '72%', top: '8%', dur: 9, dx: '-18px', dy: '22px' },
-  { size: 34, left: '48%', top: '62%', dur: 7, dx: '16px', dy: '-14px' },
-  { size: 120, left: '82%', top: '55%', dur: 13, dx: '-26px', dy: '-16px' },
-  { size: 22, left: '30%', top: '12%', dur: 8, dx: '12px', dy: '16px' },
-]
-
-function Bubbles() {
-  return BUBBLES.map((b, i) => (
-    <span key={i} className="bubble" aria-hidden style={{
-      width: b.size, height: b.size, left: b.left, top: b.top,
-      animationDuration: `${b.dur}s`, animationDelay: `${-i * 1.7}s`, '--dx': b.dx, '--dy': b.dy,
-    }} />
-  ))
 }
 
 function WarRow({ item, n, deadline }) {

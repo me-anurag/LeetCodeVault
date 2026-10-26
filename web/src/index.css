@@ -23,7 +23,8 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* War card: slowly shifting sunrise colours with floating light bubbles. */
+/* War card: a 3D world (src/war/world.js) on a canvas. The gradient shows while it loads, and stays if the
+   device cannot do WebGL. */
 .war-hero {
   background: linear-gradient(120deg, #fde68a, #fdba74, #f9a8d4, #c4b5fd, #a5f3fc, #fde68a);
   background-size: 400% 400%;
@@ -34,21 +35,14 @@ body {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
-.bubble {
-  position: absolute;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15));
-  animation: bubble-float 10s ease-in-out infinite;
+.war-scene { animation: scene-in 0.8s ease-out both; }
+@keyframes scene-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-@keyframes bubble-float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(var(--dx), var(--dy)) scale(1.12); }
-}
-.sway { display: inline-block; transform-origin: 50% 85%; animation: sway 3.2s ease-in-out infinite; }
-@keyframes sway {
-  0%, 100% { transform: rotate(-9deg); }
-  50% { transform: rotate(9deg); }
-}
+/* Keeps the title readable over sky and clouds. */
+.war-title { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 18px rgba(255, 255, 255, 0.9); }
+
 /* A tick pops in when a question is done. */
 .pop { animation: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 @keyframes pop {
@@ -60,73 +54,8 @@ body {
   0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: none; }
 }
-/* Animals. A walker strolls along the bottom of the war card (right to left, the way most animal emoji
-   face), with a butterfly crossing the top. */
-.walker { position: absolute; bottom: 6px; font-size: 28px; line-height: 1; animation: walk 24s linear infinite; }
-.walker > span { display: inline-block; animation: hop 0.45s ease-in-out infinite alternate; }
-@keyframes walk {
-  from { left: 108%; }
-  to { left: -18%; }
-}
-@keyframes hop {
-  from { transform: translateY(0) rotate(-5deg); }
-  to { transform: translateY(-6px) rotate(5deg); }
-}
-.flyer { position: absolute; top: 10px; font-size: 20px; line-height: 1; animation: fly 17s linear infinite; animation-delay: -6s; }
-.flyer > span { display: inline-block; animation: flutter 0.9s ease-in-out infinite alternate; }
-@keyframes fly {
-  0% { left: -12%; transform: translateY(0); }
-  25% { transform: translateY(14px); }
-  50% { transform: translateY(-2px); }
-  75% { transform: translateY(12px); }
-  100% { left: 112%; transform: translateY(0); }
-}
-@keyframes flutter {
-  from { transform: scale(1, 1) rotate(-6deg); }
-  to { transform: scale(0.75, 1) rotate(6deg); }
-}
-
-/* An animal pops up from the bottom of the screen after a solve. */
-.animal-pop {
-  position: fixed; left: 50%; bottom: -90px; z-index: 101; pointer-events: none;
-  font-size: 76px; line-height: 1; animation: animal-pop 2.2s ease-in-out forwards;
-}
-@keyframes animal-pop {
-  0% { transform: translate(-50%, 0); }
-  18% { transform: translate(-50%, -165px) rotate(-10deg); }
-  30% { transform: translate(-50%, -150px) rotate(10deg); }
-  42% { transform: translate(-50%, -165px) rotate(-10deg); }
-  54% { transform: translate(-50%, -150px) rotate(10deg); }
-  72% { transform: translate(-50%, -160px) rotate(0); }
-  100% { transform: translate(-50%, 0); }
-}
-
-/* Winning the war: a parade runs along the bottom of the screen. */
-.parade-animal {
-  position: fixed; bottom: 18px; z-index: 101; pointer-events: none; font-size: 46px; line-height: 1;
-  animation: parade 3.4s linear both; /* `both`: waits off-screen during its delay */
-}
-.parade-animal > span { display: inline-block; animation: hop 0.3s ease-in-out infinite alternate; }
-@keyframes parade {
-  from { left: 105%; }
-  to { left: -25%; }
-}
-
-/* Waiting for the day's questions: a sleepy cat. */
-.sleepy { position: relative; display: inline-block; font-size: 44px; line-height: 1; }
-.sleepy .z { position: absolute; top: -6px; left: 70%; font-size: 15px; font-weight: 700; color: var(--color-muted); opacity: 0; animation: snooze 3s ease-in-out infinite; }
-.sleepy .z:nth-child(2) { animation-delay: 1s; }
-.sleepy .z:nth-child(3) { animation-delay: 2s; }
-@keyframes snooze {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.7); }
-  30% { opacity: 1; }
-  100% { opacity: 0; transform: translate(18px, -30px) scale(1.2); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .war-hero, .bubble, .sway, .pop, .cheer, .walker, .walker > span, .flyer, .flyer > span, .sleepy .z { animation: none; }
-  .walker { left: 78%; }
-  .flyer { display: none; }
+  .war-hero, .war-scene, .pop, .cheer { animation: none; }
 }
 
 /* Main action buttons: sunrise gradient. */

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWar, setWarDone } from '../api'
 import { ErrorBox } from '../components/ui'
-import { animalParade, animalPop, celebrate, randomCheer } from './confetti'
+import { celebrate, randomCheer } from './confetti'
 import { formatDay, formatTime, warToday } from './time'
 
 // The button at the end of a war question. Only shown for questions that came from a daily war.
@@ -27,12 +27,11 @@ export default function WarDone({ question }) {
       setDoneAt(res.done_at)
       if (!done) return setCheer(null)
       celebrate()
-      animalPop()
       setCheer(randomCheer())
       // Was that the last one? Then the whole war is won: bigger party.
       const war = await getWar(warDate).catch(() => null)
       if (war && war.items.length && war.items.every((i) => i.done_at && Date.parse(i.done_at) <= Date.parse(war.deadline))) {
-        setTimeout(() => { celebrate({ big: true }); animalParade() }, 600)
+        setTimeout(() => celebrate({ big: true }), 600)
         setCheer(`War won! 🏆 All ${war.items.length} done.`)
       }
     } catch (err) {
