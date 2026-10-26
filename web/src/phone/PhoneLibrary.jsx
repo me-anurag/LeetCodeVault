@@ -141,6 +141,7 @@ export default function PhoneLibrary({
 
           <div className="mt-8 border-t border-line">
             <MenuItem onClick={() => navigate('/', { replace: true })}>Today's war</MenuItem>
+            <MenuItem onClick={() => navigate('/history', { replace: true })}>History</MenuItem>
             <MenuItem tone="muted" hint={user?.email} onClick={logout}>Log out</MenuItem>
           </div>
         </Sheet>

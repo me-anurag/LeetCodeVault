@@ -59,6 +59,7 @@ export default function War() {
           {date && <MenuItem onClick={() => navigate('/', { replace: true })}>Today's war</MenuItem>}
           <MenuItem hint={war ? `${war.streak.current} day${war.streak.current === 1 ? '' : 's'}` : ''}
             onClick={() => sheet.show('streak')}>Streak calendar</MenuItem>
+          <MenuItem onClick={() => navigate('/history', { replace: true })}>History · all questions given</MenuItem>
           <MenuItem onClick={() => navigate('/library', { replace: true })}>Library</MenuItem>
           <MenuItem tone="muted" hint={user?.email} onClick={logout}>Log out</MenuItem>
         </Sheet>

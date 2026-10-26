@@ -60,6 +60,7 @@ export default function PhoneQuestion({
             <p className="mt-2 text-xs text-muted">Saved {formatDate(q.saved_at, true)}</p>
           </div>
           <MenuItem onClick={() => navigate('/', { replace: true })}>Today's war</MenuItem>
+          <MenuItem onClick={() => navigate('/history', { replace: true })}>History</MenuItem>
           <MenuItem onClick={() => navigate('/library', { replace: true })}>Library</MenuItem>
           <MenuItem hint={q.language_versions.map((v) => v.language_name).join(', ')} onClick={() => sheet.show('code')}>
             Starter code

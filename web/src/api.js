@@ -86,6 +86,9 @@ export const getWarDays = (from, to) => run(supabase.rpc('war_days', { p_from: f
 
 export const getStreak = () => run(supabase.rpc('war_streak'))
 
+export const getWarHistory = ({ sort = 'newest', difficulty = [], topics = [], limit = 100 }) =>
+  run(supabase.rpc('war_history', { p_sort: sort, p_difficulties: difficulty, p_topics: topics, p_limit: limit }))
+
 export const setWarDone = (itemId, done) => run(supabase.rpc('set_war_item_done', { p_item: itemId, p_done: done }))
 
 // --- writes (only notes, solutions and deletions; the original question is read-only) ---------------------------------

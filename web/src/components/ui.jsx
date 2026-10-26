@@ -116,6 +116,7 @@ export function Layout({ children }) {
           <nav className="flex items-center gap-5 text-sm">
             <Link to="/" className="hover:underline">War</Link>
             <Link to="/streak" className="hover:underline">Streak</Link>
+            <Link to="/history" className="hover:underline">History</Link>
             <Link to="/library" className="hover:underline">Library</Link>
           </nav>
         )}

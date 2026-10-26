@@ -27,6 +27,17 @@ begin
   ), 'every war question is saved with its statement and starter code';
   assert (select count(distinct slug) from public.daily_war_items where user_id = uid) = 15, 'no duplicates';
   assert private.fill_war(uid) = 0, 'a full war is not topped up again';
+
+  -- The same question can never be given twice, even on another day.
+  begin
+    insert into public.daily_wars (user_id, war_date, deadline) values (uid, '2001-01-01', now());
+    insert into public.daily_war_items (war_id, user_id, position, slug, title, difficulty)
+    select (select id from public.daily_wars where user_id = uid and war_date = '2001-01-01'), uid, 1, slug, title, difficulty
+    from public.daily_war_items where user_id = uid limit 1;
+    raise exception 'a repeated question was accepted';
+  exception when unique_violation then
+    null; -- expected
+  end;
 end $$;
 
 -- 2. Streak rules, seen as the user: three won days in a row after a lost one; today still running.
@@ -57,6 +68,28 @@ begin
   assert public.set_war_item_done(v_item, true) ->> 'done_at' is not null;
   assert (select done from public.war_days() where war_date = private.war_today()) = 1;
   assert public.set_war_item_done(v_item, false) ->> 'done_at' is null;
+end $$;
+
+-- 3. History: every question given (15 today + 4 past), with sorting and filters.
+do $$
+declare
+  h jsonb := public.war_history();
+  nums int[];
+  v_topic text;
+begin
+  assert (h ->> 'total')::int = 19, h ->> 'total';
+  assert (h ->> 'solved')::int = 3, h ->> 'solved';
+  assert (public.war_history(p_difficulties => '{Hard}') ->> 'total')::int = 3;
+  assert (public.war_history(p_limit => 5) -> 'items') is not null
+     and jsonb_array_length(public.war_history(p_limit => 5) -> 'items') = 5;
+  select array_agg((x ->> 'frontend_id')::int) into nums
+  from jsonb_array_elements(public.war_history('number_asc') -> 'items') x where x ->> 'frontend_id' is not null;
+  assert nums = (select array_agg(n order by n) from unnest(nums) n), 'number_asc is ascending';
+  select x ->> 'slug' into v_topic from jsonb_array_elements(h -> 'topics') x limit 1;
+  assert (public.war_history(p_topics => array[v_topic]) ->> 'total')::int
+       = (select (x ->> 'count')::int from jsonb_array_elements(h -> 'topics') x where x ->> 'slug' = v_topic),
+         'topic filter matches the topic count';
+  raise notice 'history ok: % questions, % topics', h ->> 'total', jsonb_array_length(h -> 'topics');
 end $$;
 
 rollback;
