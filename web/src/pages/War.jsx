@@ -6,7 +6,7 @@ import { ErrorBox, Loading, useOnFocus } from '../components/ui'
 import { MenuItem, Sheet, TopBar, useSheet } from '../phone/Sheet'
 import { useIsPhone } from '../theme'
 import StreakCalendar from '../war/StreakCalendar'
-import { celebrate } from '../war/confetti'
+import { animalParade, celebrate } from '../war/confetti'
 import { formatDay, useNow } from '../war/time'
 import { topicName } from '../war/topics'
 
@@ -97,6 +97,7 @@ function WarBody({ war, now, error, onRetry, focusText }) {
       sessionStorage.setItem(key, '1')
     } catch { /* storage unavailable: celebrate anyway */ }
     celebrate({ big: true })
+    animalParade()
   }, [won, isToday, war.date])
 
   const pdfIds = war.items.filter((i) => i.question_id).map((i) => i.question_id)
@@ -104,8 +105,10 @@ function WarBody({ war, now, error, onRetry, focusText }) {
 
   return (
     <>
-      <div className={`war-hero ${won ? 'won' : ''} relative mt-4 overflow-hidden rounded-3xl px-6 py-7`}>
+      <div className={`war-hero ${won ? 'won' : ''} relative mt-4 overflow-hidden rounded-3xl px-6 pt-7 pb-12`}>
         <Bubbles />
+        <span className="flyer" aria-hidden><span>🦋</span></span>
+        <span className="walker" aria-hidden><span>{walkerFor(war.date)}</span></span>
         <h1 className="relative text-[30px] font-bold tracking-tight">
           {isToday ? "Today's war" : `War · ${formatDay(war.date)}`} <span className="sway" aria-hidden>{won ? '🏆' : '⚔️'}</span>
         </h1>
@@ -118,11 +121,16 @@ function WarBody({ war, now, error, onRetry, focusText }) {
       <ErrorBox error={error} onRetry={onRetry} />
 
       {!total && (
-        <p className="mt-6 text-center text-[15px] leading-relaxed text-muted">
-          {isToday && !ended
-            ? 'Your questions are on their way ☕ They arrive right after 3:00 am.'
-            : 'No war on this day.'}
-        </p>
+        <div className="mt-8 text-center">
+          {isToday && !ended && (
+            <span className="sleepy" aria-hidden>🐈<span className="z">z</span><span className="z">z</span><span className="z">z</span></span>
+          )}
+          <p className="mt-3 text-[15px] leading-relaxed text-muted">
+            {isToday && !ended
+              ? 'Your questions are on their way ☕ They arrive right after 3:00 am.'
+              : 'No war on this day.'}
+          </p>
+        </div>
       )}
 
       {total > 0 && (
@@ -141,6 +149,14 @@ function WarBody({ war, now, error, onRetry, focusText }) {
       )}
     </>
   )
+}
+
+// The animal strolling across the war card: a different one each day, the same all day.
+const WALKERS = ['🐈', '🐕', '🦊', '🐼', '🐧', '🦔', '🐢', '🐇', '🐿️', '🦆', '🐑', '🦙', '🐘', '🦒']
+function walkerFor(date) {
+  let h = 0
+  for (const c of date) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  return WALKERS[h % WALKERS.length]
 }
 
 // Soft light bubbles drifting inside the war card.

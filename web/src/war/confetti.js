@@ -62,6 +62,37 @@ export function celebrate({ big = false } = {}) {
   requestAnimationFrame(frame)
 }
 
+export const ANIMALS = ['🐶', '🐱', '🐼', '🦊', '🐸', '🐧', '🐹', '🐰', '🐨', '🐯', '🦁', '🐵', '🦄', '🐻']
+const RUNNERS = ['🐕', '🐈', '🐇', '🐿️', '🦔', '🐢', '🦆', '🐖', '🐑', '🦙']
+const pick = (list) => list[Math.floor(Math.random() * list.length)]
+const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+// A random animal pops up from the bottom of the screen, wiggles, and ducks back down.
+export function animalPop() {
+  if (reducedMotion()) return
+  const el = document.createElement('div')
+  el.className = 'animal-pop'
+  el.setAttribute('aria-hidden', 'true')
+  el.textContent = pick(ANIMALS)
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 2300)
+}
+
+// Winning the war: a parade of animals runs along the bottom of the screen.
+export function animalParade() {
+  if (reducedMotion()) return
+  const runners = [...RUNNERS].sort(() => Math.random() - 0.5).slice(0, 6)
+  runners.forEach((animal, i) => {
+    const el = document.createElement('div')
+    el.className = 'parade-animal'
+    el.setAttribute('aria-hidden', 'true')
+    el.style.animationDelay = `${i * 0.35}s`
+    el.innerHTML = `<span>${animal}</span>`
+    document.body.appendChild(el)
+    setTimeout(() => el.remove(), 3400 + i * 350 + 100)
+  })
+}
+
 // Friendly lines shown after marking a question solved.
 export const CHEERS = [
   'Nice work! 🌟',
