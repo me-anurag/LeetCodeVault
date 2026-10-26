@@ -54,11 +54,13 @@ export default function PrintQuestions() {
           <>
             {(title || questions.length > 1) && (
               <header className="doc-cover">
-                <p className="doc-brand">DailyWars</p>
-                <h1>{title || `${questions.length} questions`}</h1>
-                <p className="doc-meta">
-                  {questions.length} question{questions.length === 1 ? '' : 's'} · saved {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                </p>
+                <div className="doc-cover-head">
+                  <p className="doc-brand">DailyWars</p>
+                  <h1>{title || `${questions.length} questions`}</h1>
+                  <p className="doc-meta">
+                    {questions.length} question{questions.length === 1 ? '' : 's'} · saved {new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
                 <ol className="doc-toc">
                   {questions.map((q) => (
                     <li key={q.id}>{q.frontend_id ? `${q.frontend_id}. ` : ''}{q.title} <span>· {q.difficulty}</span></li>
@@ -94,8 +96,7 @@ function QuestionDoc({ q }) {
       <p className="doc-meta">
         <span className={`doc-diff ${q.difficulty}`}>{q.difficulty}</span>
         {q.topics.length > 0 && <> · {q.topics.map((t) => t.name).join(', ')}</>}
-        <br />
-        <span className="doc-link">{q.leetcode_url}</span>
+        {' · '}<span className="doc-link">{q.leetcode_url}</span>
       </p>
 
       {parts.intro && <Html className="statement" html={parts.intro} />}
@@ -135,7 +136,7 @@ function QuestionDoc({ q }) {
       {q.language_versions.map((v) => (
         <section key={v.language} className="doc-code">
           <h3>Starter code · {v.language_name}</h3>
-          <pre>{v.starter_code}</pre>
+          <pre>{v.starter_code.trimEnd()}</pre>
         </section>
       ))}
     </article>
