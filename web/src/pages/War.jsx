@@ -6,7 +6,8 @@ import { ErrorBox, Loading, useOnFocus } from '../components/ui'
 import { MenuItem, Sheet, TopBar, useSheet } from '../phone/Sheet'
 import { useIsPhone } from '../theme'
 import StreakCalendar from '../war/StreakCalendar'
-import { formatDay, formatLeft, formatTime, useNow } from '../war/time'
+import { celebrate } from '../war/confetti'
+import { formatDay, useNow } from '../war/time'
 import { topicName } from '../war/topics'
 
 const DOT = { Easy: 'bg-emerald-500', Medium: 'bg-amber-500', Hard: 'bg-rose-500' }
@@ -85,70 +86,44 @@ function WarBody({ war, now, error, onRetry, focusText }) {
   const ended = now >= deadline
   const total = war.items.length
   const onTime = war.items.filter((i) => i.done_at && Date.parse(i.done_at) <= deadline).length
-  const done = war.items.filter((i) => i.done_at).length
   const won = total > 0 && onTime === total
 
-  let status
-  if (!total) {
-    status = isToday && !ended
-      ? 'Your 15 questions are being picked. They usually arrive right after 3:00 am. This page refreshes on its own.'
-      : 'No war on this day.'
-  } else if (won) {
-    status = 'Won. Every question done before the deadline.'
-  } else if (!ended) {
-    status = `${formatLeft(deadline - now)} left · ends ${formatTime(deadline)}`
-  } else {
-    status = `Ended at ${formatTime(deadline)} · ${onTime} of ${total} on time`
-  }
+  // A won war gets one big celebration per day (per browser tab session).
+  useEffect(() => {
+    if (!won || !isToday) return
+    const key = `celebrated-${war.date}`
+    try {
+      if (sessionStorage.getItem(key)) return
+      sessionStorage.setItem(key, '1')
+    } catch { /* storage unavailable: celebrate anyway */ }
+    celebrate({ big: true })
+  }, [won, isToday, war.date])
+
+  const pdfIds = war.items.filter((i) => i.question_id).map((i) => i.question_id)
+  const pdfTitle = `War · ${formatDay(war.date, { weekday: 'long', year: 'numeric' })}`
 
   return (
     <>
-      <div className={`mt-4 rounded-3xl bg-linear-to-br p-5 ${won
-        ? 'from-emerald-100 via-teal-50 to-sky-100'
-        : 'from-amber-100 via-orange-100 to-pink-100'}`}>
-        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-orange-700/80">
-          {formatDay(war.date, { weekday: 'long' })}
-        </p>
-        <h1 className="mt-1 text-[28px] font-bold tracking-tight">
-          {won ? 'Victory! 🎉' : isToday ? "Today's war ⚔️" : 'War'}
+      <div className={`war-hero ${won ? 'won' : ''} relative mt-4 overflow-hidden rounded-3xl px-6 py-7`}>
+        <Bubbles />
+        <h1 className="relative text-[30px] font-bold tracking-tight">
+          {isToday ? "Today's war" : `War · ${formatDay(war.date)}`} <span className="sway" aria-hidden>{won ? '🏆' : '⚔️'}</span>
         </h1>
-        <p className={`mt-1 text-[15px] ${won ? 'text-emerald-800' : 'text-ink-soft'}`}>{status}</p>
-        {isToday && ended && (
-          <p className="mt-1 text-[15px] text-ink-soft">Next war at {formatTime(war.next_start)}.</p>
-        )}
-        {war.items.some((i) => i.question_id) && (
-          <Link to={`/print?ids=${war.items.filter((i) => i.question_id).map((i) => i.question_id).join(',')}&title=${encodeURIComponent(`War · ${formatDay(war.date, { weekday: 'long', year: 'numeric' })}`)}`}
-            className="mt-2 mr-2 inline-flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-1 text-[13px] font-medium text-orange-700">
-            📄 Save as PDF
-          </Link>
-        )}
         {isToday && focusText && (
-          <Link to="/topics" className="mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/70 px-2.5 py-1 text-[13px] font-medium text-violet-700">
+          <Link to="/topics" className="relative mt-3 inline-flex max-w-full items-center gap-1 truncate rounded-full bg-white/75 px-3 py-1.5 text-[14px] font-medium text-violet-700 shadow-sm">
             🎯 Focus: {focusText} ›
           </Link>
         )}
-
-        {total > 0 && (
-          <>
-            <div className="mt-4 flex items-baseline justify-between text-sm">
-              <span>
-                <span className="text-[24px] font-bold tabular-nums">{done}</span>
-                <span className="text-ink-soft"> / {total} done</span>
-              </span>
-              <span className="rounded-full bg-white/70 px-2.5 py-1 font-medium text-orange-700">
-                🔥 {war.streak.current} day{war.streak.current === 1 ? '' : 's'}
-              </span>
-            </div>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70">
-              <div className={`h-full rounded-full bg-linear-to-r transition-all duration-500 ${won
-                ? 'from-emerald-400 to-teal-500'
-                : 'from-orange-400 via-pink-500 to-violet-500'}`}
-                style={{ width: `${(done / total) * 100}%` }} />
-            </div>
-          </>
-        )}
       </div>
       <ErrorBox error={error} onRetry={onRetry} />
+
+      {!total && (
+        <p className="mt-6 text-center text-[15px] leading-relaxed text-muted">
+          {isToday && !ended
+            ? 'Your questions are on their way ☕ They arrive right after 3:00 am.'
+            : 'No war on this day.'}
+        </p>
+      )}
 
       {total > 0 && (
         <ul className="mt-6 border-t border-line">
@@ -157,8 +132,33 @@ function WarBody({ war, now, error, onRetry, focusText }) {
           ))}
         </ul>
       )}
+
+      {pdfIds.length > 0 && (
+        <Link to={`/print?ids=${pdfIds.join(',')}&title=${encodeURIComponent(pdfTitle)}`}
+          className="mt-10 flex items-center justify-center gap-2 rounded-2xl border border-line bg-white/60 py-3 text-[15px] font-medium text-ink-soft active:opacity-70">
+          📄 Save this war as PDF
+        </Link>
+      )}
     </>
   )
+}
+
+// Soft light bubbles drifting inside the war card.
+const BUBBLES = [
+  { size: 90, left: '-6%', top: '-30%', dur: 11, dx: '24px', dy: '18px' },
+  { size: 54, left: '72%', top: '8%', dur: 9, dx: '-18px', dy: '22px' },
+  { size: 34, left: '48%', top: '62%', dur: 7, dx: '16px', dy: '-14px' },
+  { size: 120, left: '82%', top: '55%', dur: 13, dx: '-26px', dy: '-16px' },
+  { size: 22, left: '30%', top: '12%', dur: 8, dx: '12px', dy: '16px' },
+]
+
+function Bubbles() {
+  return BUBBLES.map((b, i) => (
+    <span key={i} className="bubble" aria-hidden style={{
+      width: b.size, height: b.size, left: b.left, top: b.top,
+      animationDuration: `${b.dur}s`, animationDelay: `${-i * 1.7}s`, '--dx': b.dx, '--dy': b.dy,
+    }} />
+  ))
 }
 
 function WarRow({ item, n, deadline }) {
@@ -166,7 +166,7 @@ function WarRow({ item, n, deadline }) {
   const mark = !item.done_at ? (
     <span className="h-5 w-5 shrink-0 rounded-full border-[1.5px] border-line" aria-label="Not done" />
   ) : (
-    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] text-white ${late ? 'bg-amber-500' : 'bg-emerald-600'}`}
+    <span className={`pop flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] text-white ${late ? 'bg-amber-500' : 'bg-emerald-600'}`}
       aria-label={late ? 'Done late' : 'Done'}>✓</span>
   )
   const body = (

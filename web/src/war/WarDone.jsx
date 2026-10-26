@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { setWarDone } from '../api'
+import { getWar, setWarDone } from '../api'
 import { ErrorBox } from '../components/ui'
+import { celebrate, randomCheer } from './confetti'
 import { formatDay, formatTime, warToday } from './time'
 
 // The button at the end of a war question. Only shown for questions that came from a daily war.
@@ -10,6 +11,7 @@ export default function WarDone({ question }) {
   const [doneAt, setDoneAt] = useState(item?.done_at ?? null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [cheer, setCheer] = useState(null) // shown right after pressing the button
   if (!item) return null
 
   const deadline = Date.parse(item.war.deadline)
@@ -21,7 +23,17 @@ export default function WarDone({ question }) {
     setBusy(true)
     setError(null)
     try {
-      setDoneAt((await setWarDone(item.id, done)).done_at)
+      const res = await setWarDone(item.id, done)
+      setDoneAt(res.done_at)
+      if (!done) return setCheer(null)
+      celebrate()
+      setCheer(randomCheer())
+      // Was that the last one? Then the whole war is won: bigger party.
+      const war = await getWar(warDate).catch(() => null)
+      if (war && war.items.length && war.items.every((i) => i.done_at && Date.parse(i.done_at) <= Date.parse(war.deadline))) {
+        setTimeout(() => celebrate({ big: true }), 600)
+        setCheer(`War won! 🏆 All ${war.items.length} done.`)
+      }
     } catch (err) {
       setError(err)
     } finally {
@@ -35,6 +47,7 @@ export default function WarDone({ question }) {
       : 'border-orange-200 bg-linear-to-br from-amber-50 to-pink-50'}`}>
       {doneAt ? (
         <>
+          {cheer && <p className="cheer mb-1 text-[20px] font-bold text-emerald-800">{cheer}</p>}
           <p className={`text-[16px] font-semibold ${late ? 'text-amber-700' : 'text-emerald-700'}`}>
             {late ? '✓' : '🎉'} Done{late ? ' late' : ''} · {formatTime(doneAt)}{isToday ? '' : `, ${new Date(doneAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`}
           </p>
